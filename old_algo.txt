@@ -1,0 +1,37 @@
+if sensor_value < threshold_yellow:
+        # If below the first threshold, stay green
+        if current_state != "green":
+            color_palette[0] = (0, 255, 0)  # Set to green
+            current_state = "green"
+
+    elif threshold_yellow <= sensor_value < threshold_red:
+        # If between thresholds, transition from green to yellow
+        if current_state != "yellow":
+            current_color = GREEN
+            next_color = YELLOW
+
+            # Perform a smooth transition
+            for step in range(transition_steps):
+                blend_factor = step / transition_steps
+                blended_color = blend_colors(current_color, next_color, blend_factor)
+                color_palette[0] = blended_color
+                time.sleep(step_delay)
+            
+            color_palette[0] = (255, 255, 0)  # Set to yellow
+            current_state = "yellow"
+
+    else:
+        # If above the second threshold, transition from yellow to red
+        if current_state != "red":
+            current_color = YELLOW
+            next_color = RED
+
+            # Perform a smooth transition
+            for step in range(transition_steps):
+                blend_factor = step / transition_steps
+                blended_color = blend_colors(current_color, next_color, blend_factor)
+                color_palette[0] = blended_color
+                time.sleep(step_delay)
+
+            color_palette[0] = (255, 0, 0)  # Set to red
+            current_state = "red"
