@@ -11,8 +11,8 @@ display = matrix.display
 
 # Set up the analog input pin (e.g., A1)
 analog_input = analogio.AnalogIn(board.A1)
-threshold_yellow = 2  # Threshold for transitioning from green to yellow
-threshold_red = 3     # Threshold for transitioning from yellow to red
+threshold_yellow = 1.4  # Threshold for transitioning from green to yellow
+threshold_red = 2.55    # Threshold for transitioning from yellow to red
 
 # Initialize a displayio group to hold the background color
 color_bitmap = displayio.Bitmap(display.width, display.height, 1)
@@ -23,52 +23,50 @@ group.append(color_tile)
 display.root_group = group  # Set the root group to show the background color
 
 
-# Smooth transition settings
-transition_steps = 100  # Number of steps for smooth transition
-step_delay = 0.05       # Delay per step
-
 # Helper function to blend between two colors
-def blend_colors(color1, color2, blend_factor):
-    r1, g1, b1 = color1
-    r2, g2, b2 = color2
-    r = int(r1 + (r2 - r1) * blend_factor)
-    g = int(g1 + (g2 - g1) * blend_factor)
-    b = int(b1 + (b2 - b1) * blend_factor)
-    return (r << 16) | (g << 8) | b
 
 def get_voltage(pin):
     return (pin.value / 65536) * 3.3
 
-def sample_signal(analog_input):
-    samples = []        # declare a list for sampling our inputs
-    sample_size = 10    # set the sample size
-    for i in range(sample_size):
-        sample = analog_input  # grab the voltage from analog pin
-        samples.append(sample)              # add the voltage to the list of samples
-    return sum(samples) / len(samples)      # return the average of the
+def sample_signal(signal, samples=5000):
+    return sum(signal[:samples]) / samples
 
-# Variable to track current state
-current_state = "green"
+    samples = []        # declare a list for sampling our inputs
+    sample_size = 5000    # set the sample size
+    for i in range(sample_size):
+        sample = signal          # grab the voltage from analog pin
+        samples.append(sample)   # add the voltage to the list of samples
+
+    return max(samples)          # return the average of the
+
+
+def find_delta(signal):
+    return max(signal) - min(signal)
 
 # Main loop: control transitions based on analog input
 while True:
-    sensor_value = sample_signal(get_voltage(analog_input))
+    signal = [get_voltage(analog_input) for _ in range(5000)]
+    #sensor_value = sample_signal(get_voltage(analog_input))
+    #sensor_value = get_voltage(analog_input)
+    sensor_delta = find_delta(signal)
+    #print("Sensor value is: ", sensor_value)
+    print("Sensor delta is: ", sensor_delta)
+    #print((sensor_value,))
+    print((sensor_delta,))
 
-    print("Sensor value is: ", sensor_value)
-    print((sensor_value,))
-    
-    if sensor_value < threshold_yellow:
-        color_palette[0] = (0, 255, 0)
-    elif sensor_value > threshold_yellow and sensor_value < threshold_red:
-        color_palette[0] = (255, 255, 0)
+    if sensor_delta < threshold_yellow:
+        color_palette[0] = (0, 90, 0)
+    elif threshold_yellow < sensor_delta < threshold_red:
+        color_palette[0] = (90, 90, 0)
+        time.sleep(1)
+
     else:
-        color_palette[0] = (255, 0, 0)
-        time.sleep(.05)
-        color_palette[0] = (255, 255, 0)
-    
-    
+        color_palette[0] = (90, 0, 0)
+        time.sleep(1)
+
+
 
     # Check the current state and sensor value
 
     # Short delay to avoid rapid polling
-    time.sleep(1)
+    time.sleep(.1)
