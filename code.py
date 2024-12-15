@@ -8,7 +8,6 @@ from adafruit_matrixportal.matrix import Matrix
 matrix = Matrix()
 display = matrix.display
 
-
 # Set up the analog input pin (e.g., A1)
 analog_input = analogio.AnalogIn(board.A1)
 threshold_yellow = 1.4  # Threshold for transitioning from green to yellow
@@ -21,9 +20,6 @@ color_tile = displayio.TileGrid(color_bitmap, pixel_shader=color_palette)
 group = displayio.Group()
 group.append(color_tile)
 display.root_group = group  # Set the root group to show the background color
-
-
-# Helper function to blend between two colors
 
 def get_voltage(pin):
     return (pin.value / 65536) * 3.3
@@ -49,6 +45,7 @@ while True:
 
     if sensor_delta < threshold_yellow:
         color_palette[0] = (0, 90, 0)
+        
     elif threshold_yellow < sensor_delta < threshold_red:
         color_palette[0] = (90, 90, 0)
         time.sleep(1)
@@ -57,9 +54,4 @@ while True:
         color_palette[0] = (90, 0, 0)
         time.sleep(1)
 
-
-
-    # Check the current state and sensor value
-
-    # Short delay to avoid rapid polling
     time.sleep(.1)
