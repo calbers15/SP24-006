@@ -8,6 +8,7 @@ from adafruit_matrixportal.matrix import Matrix
 matrix = Matrix()
 display = matrix.display
 
+
 # Set up the analog input pin (e.g., A1)
 analog_input = analogio.AnalogIn(board.A1)
 threshold_yellow = 1.4  # Threshold for transitioning from green to yellow
@@ -21,20 +22,27 @@ group = displayio.Group()
 group.append(color_tile)
 display.root_group = group  # Set the root group to show the background color
 
+
+# Helper function to blend between two colors
+
 def get_voltage(pin):
     return (pin.value / 65536) * 3.3
 
 def sample_signal(signal, samples=5000):
     return sum(signal[:samples]) / samples
+
+def find_delta(signal):
+    return max(signal) - min(signal)
+
 # Main loop: control transitions based on analog input
 while True:
     signal = [get_voltage(analog_input) for _ in range(5000)]
-    #DEBUG
-    #sensor_value = sample_signal(get_voltage(analog_input))
-    #sensor_value = get_voltage(analog_input)
-    #print("Sensor value is: ", sensor_value)
-    #print((sensor_value,))
-    
+    ########################DEBUG##################################
+    #sensor_value = sample_signal(get_voltage(analog_input))      # 
+    #sensor_value = get_voltage(analog_input)                     #
+    #print("Sensor value is: ", sensor_value)                     #
+    #print((sensor_value,))                                       #
+    ###############################################################
     sensor_delta = find_delta(signal)
     print("Sensor delta is: ", sensor_delta)
     print((sensor_delta,))
@@ -48,6 +56,10 @@ while True:
     else:
         color_palette[0] = (90, 0, 0)
         time.sleep(1)
+
+
+
+    # Check the current state and sensor value
 
     # Short delay to avoid rapid polling
     time.sleep(.1)
